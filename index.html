@@ -76,19 +76,39 @@
             </div>
         </section>
 
-        <!-- Hasil Pengecekan Tanggal Dipilih (Pagi, Malam, & Libur) -->
-        <section id="selected-date-card" class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-700/60 flex-wrap gap-2">
+        <!-- Hasil Pengecekan Tanggal Dipilih -->
+        <section id="selected-date-card" class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700/60 flex-wrap gap-2">
                 <h3 id="display-selected-date" class="font-bold text-base text-slate-200">Jadwal Tanggal: --</h3>
                 <span class="text-xs text-slate-400 font-medium">Pagi: 08:00 - 20:00 | Malam: 20:00 - 08:00</span>
             </div>
             
-            <div id="selected-date-results-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Diisi via JavaScript -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Shift Pagi -->
+                <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/60 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-1.5 mb-1">
+                            <span>☀️</span> Shift Pagi (08:00 - 20:00)
+                        </div>
+                        <div id="result-morning-platoon" class="text-xl font-extrabold text-white">--</div>
+                    </div>
+                    <div id="badge-morning" class="text-xs px-2.5 py-1 rounded-lg font-semibold bg-slate-800 text-slate-400">--</div>
+                </div>
+
+                <!-- Shift Malam -->
+                <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/60 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1.5 mb-1">
+                            <span>🌙</span> Shift Malam (20:00 - 08:00)
+                        </div>
+                        <div id="result-night-platoon" class="text-xl font-extrabold text-white">--</div>
+                    </div>
+                    <div id="badge-night" class="text-xs px-2.5 py-1 rounded-lg font-semibold bg-slate-800 text-slate-400">--</div>
+                </div>
             </div>
         </section>
 
-        <!-- Ringkasan Status & Kontak Danru Keseluruhan -->
+        <!-- Ringkasan Siklus Pleton & Kontak Danru -->
         <section class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-lg">
             <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
                 <span>🔄</span> Status & Kontak Danru Pleton (Pleton 1 - 3)
@@ -261,54 +281,15 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('display-selected-date').innerText = `Jadwal Tanggal: ${selectedDate.toLocaleDateString('id-ID', options)}`;
 
-            const data = getAllPlatoonsStatusForDate(selectedDate);
-            const resContainer = document.getElementById('selected-date-results-container');
-            resContainer.innerHTML = '';
+            const sched = getScheduleForDate(selectedDate);
+            
+            document.getElementById('result-morning-platoon').innerText = `Pleton 0${sched.morning}`;
+            document.getElementById('badge-morning').innerText = 'Jaga Pagi';
+            document.getElementById('badge-morning').className = 'text-xs px-2.5 py-1 rounded-lg font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
 
-            // Urutkan atau tampilkan 3 card: Pagi, Malam, Libur
-            for (let p = 1; p <= 3; p++) {
-                let statusText = data.statuses[p];
-                let icon = '🏖️';
-                let timeDesc = 'Hari Istirahat / Lepas Jaga';
-                let badgeClass = 'bg-slate-700/50 text-slate-400';
-                
-                if (statusText === 'Jaga Pagi') {
-                    icon = '☀️';
-                    timeDesc = 'Shift Pagi (08:00 - 20:00)';
-                    badgeClass = 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
-                } else if (statusText === 'Jaga Malam') {
-                    icon = '🌙';
-                    timeDesc = 'Shift Malam (20:00 - 08:00)';
-                    badgeClass = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
-                }
-
-                let contacts = danruContacts[p];
-
-                resContainer.innerHTML += `
-                    <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/60 flex flex-col justify-between space-y-3">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
-                                    <span>${icon}</span> Pleton 0${p}
-                                </div>
-                                <span class="text-xs px-2.5 py-1 rounded-lg font-semibold ${badgeClass}">${statusText}</span>
-                            </div>
-                            <div class="text-sm font-extrabold text-white mt-1">${timeDesc}</div>
-                        </div>
-                        <div class="space-y-2 pt-2 border-t border-slate-800">
-                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Kontak Danru:</div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="https://wa.me/${contacts[0].phone}" target="_blank" class="flex items-center justify-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold py-2 px-2 rounded-lg transition text-center">
-                                    <span>💬</span> ${contacts[0].name.split(' ')[0]} 1
-                                </a>
-                                <a href="https://wa.me/${contacts[1].phone}" target="_blank" class="flex items-center justify-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold py-2 px-2 rounded-lg transition text-center">
-                                    <span>💬</span> ${contacts[1].name.split(' ')[0]} 2
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+            document.getElementById('result-night-platoon').innerText = `Pleton 0${sched.night}`;
+            document.getElementById('badge-night').innerText = 'Jaga Malam';
+            document.getElementById('badge-night').className = 'text-xs px-2.5 py-1 rounded-lg font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
         }
 
         window.addEventListener('DOMContentLoaded', () => {
